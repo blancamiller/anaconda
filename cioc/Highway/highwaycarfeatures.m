@@ -1,0 +1,95 @@
+% Modify the features to add the final set of car features to the highway.
+function features_pt = highwaycarfeatures(features_pt,mdp_data)
+
+fprintf('features_pt BEFORE - input!?! - adding car features \n')
+display(features_pt{3})
+
+
+% Pull out the car features.
+cars = features_pt(length(features_pt)-length(mdp_data.cars)+1:end);
+features_pt(length(features_pt)-length(mdp_data.cars)+1:end) = [];
+
+
+fprintf('features_pt BEFORE - fourth last - adding car features \n')
+display(features_pt{3})
+
+
+%fprintf('features_pt{1}.xe \n')
+%display(features_pt{1}.xe)
+
+% Create standard car feature.
+carstd = struct('type','sum','theta',ones(1,length(cars)),'features',{cars});
+
+% Create big forward/backward Gaussian.
+for i=1:length(cars),
+    cars{i}.width = 50;
+end;
+carsfb = struct('type','sum','theta',ones(1,length(cars)),'features',{cars});
+
+% Create big sideways Gaussian.
+for i=1:length(cars),
+    cars{i}.width = 50;
+    cars{i}.lam = [1 4];
+end;
+carslr = struct('type','sum','theta',ones(1,length(cars)),'features',{cars});
+
+%fprintf('carslr.features{3}: \n')
+%display(carslr.features{3})
+%fieldnames(carslr)
+
+%fieldnames(features_pt{1})
+%fprintf('features_pt{1} \n')
+%fprintf('length features_pt{}.xe: %d\n', length(features_pt))
+%display(features_pt{3}.xe) 
+
+
+%fprintf('features_pt BEFORE - third last - adding car features \n')
+%display(features_pt{3})
+
+
+% Create forward/backward Gaussian behind car.
+offset = [0 -0.1];
+for i=1:length(cars),
+    cars{i}.width = 50;
+    cars{i}.lam = [8 1];
+    for t=1:size(cars{i}.x,1),
+        theta = cars{i}.x(t,3);
+        x = cars{i}.x(t,1) + offset(1)*cos(theta) + offset(2)*sin(theta);
+        y = cars{i}.x(t,2) + offset(2)*cos(theta) - offset(1)*sin(theta);
+        cars{i}.x(t,1) = x;
+        cars{i}.x(t,2) = y;
+    end;
+end;
+carsb = struct('type','sum','theta',ones(1,length(cars)),'features',{cars});
+
+%fprintf('features_pt BEFORE - second last - adding car features \n')
+%display(features_pt{3})
+
+
+% Create forward/backward Gaussian in front of car.
+offset = [0 0.2];
+for i=1:length(cars),
+    cars{i}.width = 50;
+    cars{i}.lam = [8 1];
+    for t=1:size(cars{i}.x,1),
+        theta = cars{i}.x(t,3);
+        x = cars{i}.x(t,1) + offset(1)*cos(theta) + offset(2)*sin(theta);
+        y = cars{i}.x(t,2) + offset(2)*cos(theta) - offset(1)*sin(theta);
+        cars{i}.x(t,1) = x;
+        cars{i}.x(t,2) = y;
+    end;
+end;
+carsf = struct('type','sum','theta',ones(1,length(cars)),'features',{cars});
+
+% Create features.
+%display(features_pt{3})
+features_pt = [features_pt {carsf, carsb, carslr, carsfb, carstd}];
+
+%fieldnames(features_pt{1})
+%display(features_pt{1})
+%fprintf('features_pt{1,5} \n')
+%display(features_pt{1,3})
+%fprintf('features_pt{1,9}')
+%display(features_pt{1,9}.xe)
+%fprintf()
+%display()

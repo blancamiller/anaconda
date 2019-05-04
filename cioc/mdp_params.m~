@@ -1,0 +1,1 @@
+struct('seed',1, 'optimizes',0, 'fixed_pattern',1, 'carfile','Highway/cars128', 'group_lane_features',1, 'speed_features',0)
